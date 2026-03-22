@@ -1,0 +1,57 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create release directory
+      run: |
+        mkdir -p release/soul
+
+    - name: Download pankration files
+      run: |
+        wget -O release/soul/pankration_data.lua https://raw.githubusercontent.com/LandSandBoat/server/refs/heads/base/scripts/data/pankration.lua
+        wget -O release/soul/pankration.lua https://raw.githubusercontent.com/LandSandBoat/server/refs/heads/base/scripts/enum/pankration.lua
+
+    - name: Copy addon files to release directory
+      run: |
+        cp *.lua release/soul/
+
+    - name: Create zip archive
+      run: |
+        cd release
+        zip -r soul.zip soul/
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        tag_name: ${{ github.run_number }}
+        release_name: Release ${{ github.run_number }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/soul.zip
+        asset_name: soul.zip
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
