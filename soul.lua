@@ -144,7 +144,7 @@ local function parseSkillStream(extra)
             val = bit.rshift(val, adjOff)
         end
 
-        local skillId = bit.band(val, 0x3FF)
+        local skillId = bit.band(val, 0xFFF)
         local skillLv = bit.band(bit.rshift(val, 12), 0x7F)
         if skillId > 0 then
             skills[#skills + 1] = { id = skillId, name = getSkillName(skillId), lv = skillLv }
